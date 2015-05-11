@@ -135,7 +135,6 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter(CNT_PARAM, Integer.toString(numOfDays));
                 Uri uri = uriBuilder.build();
                 String uriStr = uri.toString();
-                Log.v(LOG_TAG, "url:" + uriStr);
                 URL url = new URL(uriStr);
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -164,7 +163,6 @@ public class ForecastFragment extends Fragment {
                     forecastJsonStr = null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.v(LOG_TAG, forecastJsonStr);
                 return getWeatherDataFromJson(forecastJsonStr, numOfDays);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
@@ -289,10 +287,6 @@ public class ForecastFragment extends Fragment {
 
                 highAndLow = formatHighLows(high, low);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
-            }
-
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
             }
             return resultStrs;
 
