@@ -1,5 +1,6 @@
 package com.example.pbabu.sunshine.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -71,8 +72,11 @@ public class ForecastFragment extends Fragment {
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String toastText = forecastAdapter.getItem(position);
-                Toast.makeText(view.getContext(), toastText, Toast.LENGTH_SHORT).show();
+                //start detail activity using explicit intent.
+                String forecastText = forecastAdapter.getItem(position);
+                Intent detailActivityIntent = new Intent(view.getContext(), ForecastDetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, forecastText);
+                startActivity(detailActivityIntent);
             }
         });
         forecastListView.setAdapter(forecastAdapter);
