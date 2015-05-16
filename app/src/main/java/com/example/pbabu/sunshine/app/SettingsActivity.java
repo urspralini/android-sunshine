@@ -11,8 +11,6 @@ import android.preference.PreferenceManager;
  * Created by pbabu on 5/16/15.
  */
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public static final String PREF_UNITS = "pref_units";
-    public static final String PREF_LOCATION = "pref_location";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,13 +21,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     private void setSummaryForPreferences(){
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        onSharedPreferenceChanged(sharedPref, PREF_UNITS);
-        onSharedPreferenceChanged(sharedPref, PREF_LOCATION);
+        onSharedPreferenceChanged(sharedPref, getString(R.string.pref_units_key));
+        onSharedPreferenceChanged(sharedPref, getString(R.string.pref_location_key));
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(key.equals(PREF_UNITS)){
+        if(key.equals(getString(R.string.pref_units_key))){
             ListPreference unitsPreference = (ListPreference)findPreference(key);
             String value = sharedPreferences.getString(key, "");
             int indexOfValue = unitsPreference.findIndexOfValue(value);

@@ -316,8 +316,8 @@ public class ForecastFragment extends Fragment {
 
     private void fetchWeatherForeCast(){
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String postalCode = sharedPreferences.getString(SettingsActivity.PREF_LOCATION, "");
-        String unitMetric = sharedPreferences.getString(SettingsActivity.PREF_UNITS, "");
+        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key), "");
+        String unitMetric = sharedPreferences.getString(getString(R.string.pref_units_key), "");
         FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
         fetchWeatherTask.execute(postalCode, unitMetric);
     }

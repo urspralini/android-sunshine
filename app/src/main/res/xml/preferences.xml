@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
-        android:key="pref_location"
+        android:key="@string/pref_location_key"
         android:title="@string/pref_location_title"
         android:defaultValue="@string/pref_location_default"
         android:summary="95134"
         android:inputType="number"
         android:singleLine="true"/>
     <ListPreference
-        android:key="pref_units"
+        android:key="@string/pref_units_key"
         android:title="@string/pref_units_title"
         android:defaultValue="@string/pref_units_default"
         android:dialogTitle="@string/pref_units_dialog_title"
