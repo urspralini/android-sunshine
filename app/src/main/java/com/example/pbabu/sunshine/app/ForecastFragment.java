@@ -42,7 +42,7 @@ import java.util.List;
 public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> forecastAdapter;
-
+    private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     public ForecastFragment() {
     }
 
@@ -101,6 +101,8 @@ public class ForecastFragment extends Fragment {
         if(item.getItemId() == R.id.action_refresh) {
             fetchWeatherForeCast();
             return true;
+        }else if (item.getItemId() == R.id.action_view_loc_on_map) {
+            showLocationOnMap();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -108,6 +110,12 @@ public class ForecastFragment extends Fragment {
     @Override
     public void setHasOptionsMenu(boolean hasMenu) {
         super.setHasOptionsMenu(hasMenu);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchWeatherForeCast();
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -322,9 +330,21 @@ public class ForecastFragment extends Fragment {
         fetchWeatherTask.execute(postalCode);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        fetchWeatherForeCast();
+    private void showLocationOnMap(){
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        //create an implicit intent to open the location on the map
+        Uri locationUri = Uri.parse("geo:0,0?")
+                .buildUpon()
+                .appendQueryParameter("q", postalCode)
+                .build();
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW)
+                .setData(locationUri);
+        if(mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivity(mapIntent);
+        }else {
+            Log.d(LOG_TAG, "Could not call map view intent for location:" + postalCode);
+        }
     }
 }
