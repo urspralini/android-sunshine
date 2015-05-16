@@ -4,4 +4,10 @@
     <string name="action_settings">Settings</string>
     <string name="action_refersh" translatable="false">Refresh</string>
     <string name="title_activity_forecast_detail">ForecastDetailActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="pref_location_title">Location</string>
+    <string name="pref_units_title">Units</string>
+    <string name="pref_units_dialog_title">Pick your Unit</string>
+    <string name="pref_location_default">95134</string>
+    <string name="pref_units_default">metric</string>
 </resources>

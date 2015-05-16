@@ -1,8 +1,10 @@
 package com.example.pbabu.sunshine.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -56,7 +58,7 @@ public class ForecastFragment extends Fragment {
                 "Sat - Sunny - 60/50"
         };
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        ArrayList<String> sampleWeatherForecast = new ArrayList<>(Arrays.asList(sampleWeatherForecastArr));
+        ArrayList<String> weatherForecast = new ArrayList<>();
         forecastAdapter = new ArrayAdapter<String>(
                 //current context,fragment's parent activity
                 getActivity(),
@@ -65,8 +67,12 @@ public class ForecastFragment extends Fragment {
                 //id of text view to populate
                 R.id.list_item_forecast_textview,
                 //data list
-                sampleWeatherForecast
+                weatherForecast
         );
+
+        //fetch weather forecast for the current user preferences in the foreground
+        fetchWeatherForeCast();
+
         ListView forecastListView = (ListView)fragmentView.findViewById(R.id.listview_forecast);
         //set on item click listener
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -98,9 +104,7 @@ public class ForecastFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_refresh) {
-            final String MV_POSTAL_CODE = "94043";
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute(MV_POSTAL_CODE);
+            fetchWeatherForeCast();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -119,13 +123,17 @@ public class ForecastFragment extends Fragment {
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-
             final String DEFAULT_POSTAL_CODE = "95134"; // default postal code
-            String postalCode = null;
-            if(params == null || params.length == 0){
-                postalCode = DEFAULT_POSTAL_CODE;
-            }else {
-                postalCode = params[0];
+            final String DEFAULT_UNIT = "metric";
+            String postalCode = DEFAULT_POSTAL_CODE;
+            String unitMetric = DEFAULT_UNIT;
+            if(params != null && params.length == 2){
+                if(!params[0].isEmpty()){
+                    postalCode = params[0];
+                }
+                if(!params[1].isEmpty()) {
+                    unitMetric = params[1];
+                }
             }
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
@@ -140,7 +148,6 @@ public class ForecastFragment extends Fragment {
                 final String UNITS_PARAM = "units";
                 final String CNT_PARAM = "cnt";
                 final String modeJson = "json";
-                String unitMetric = "metric";
                 int numOfDays = 7;
                 Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, postalCode)
@@ -305,5 +312,19 @@ public class ForecastFragment extends Fragment {
             return resultStrs;
 
         }
+    }
+
+    private void fetchWeatherForeCast(){
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String postalCode = sharedPreferences.getString(SettingsAcvitity.PREF_LOCATION, "");
+        String unitMetric = sharedPreferences.getString(SettingsAcvitity.PREF_UNITS, "");
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        fetchWeatherTask.execute(postalCode, unitMetric);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchWeatherForeCast();
     }
 }

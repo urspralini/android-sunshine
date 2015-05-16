@@ -28,6 +28,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.pbabu.sunshine.app.MainActivity" />
         </activity>
+        <activity
+            android:name=".SettingsAcvitity"
+            android:label="@string/title_activity_settings">
+        </activity>
     </application>
 
 </manifest>

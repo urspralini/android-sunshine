@@ -1,5 +1,6 @@
 package com.example.pbabu.sunshine.app;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -31,6 +32,8 @@ public class ForecastDetailActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsActivityIntent = new Intent(this, SettingsAcvitity.class);
+            startActivity(settingsActivityIntent);
             return true;
         }
 
