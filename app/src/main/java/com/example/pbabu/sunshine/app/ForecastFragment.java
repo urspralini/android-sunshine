@@ -119,15 +119,11 @@ public class ForecastFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             final String DEFAULT_POSTAL_CODE = "95134"; // default postal code
-            final String DEFAULT_UNIT = "metric";
             String postalCode = DEFAULT_POSTAL_CODE;
-            String unitMetric = DEFAULT_UNIT;
-            if(params != null && params.length == 2){
+            String unitMetric = "metric";
+            if(params != null && params.length>=1){
                 if(!params[0].isEmpty()){
                     postalCode = params[0];
-                }
-                if(!params[1].isEmpty()) {
-                    unitMetric = params[1];
                 }
             }
             // Will contain the raw JSON response as a string.
@@ -226,11 +222,16 @@ public class ForecastFragment extends Fragment {
         /**
          * Prepare the weather high/lows for presentation.
          */
-        private String formatHighLows(double high, double low) {
+        private String formatHighLows(double high, double low, String unitType) {
+            if (unitType.equals(getString(R.string.pref_units_imperial))) {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if (!unitType.equals(getString(R.string.pref_units_metric))) {
+                Log.d(LOG_TAG, "Unit type not found: " + unitType);
+            }
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
-
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
         }
@@ -301,7 +302,11 @@ public class ForecastFragment extends Fragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                //fetch temperature unit type from preferences
+                final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String unitType = sharedPreferences.getString(getString(R.string.pref_units_key),
+                        getString(R.string.pref_units_default));
+                highAndLow = formatHighLows(high, low, unitType);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
             return resultStrs;
@@ -313,10 +318,8 @@ public class ForecastFragment extends Fragment {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
                 getString(R.string.pref_location_default));
-        String unitMetric = sharedPreferences.getString(getString(R.string.pref_units_key),
-                getString(R.string.pref_units_default));
         FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-        fetchWeatherTask.execute(postalCode, unitMetric);
+        fetchWeatherTask.execute(postalCode);
     }
 
     @Override
