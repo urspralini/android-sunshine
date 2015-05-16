@@ -49,14 +49,6 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        String[] sampleWeatherForecastArr = new String[]{
-                "Today - Sunny 88/63",
-                "Tomorrow - Rainy - 50/40",
-                "Weds - Foggy - 60/50",
-                "Thu - Sunny - 88/63",
-                "Fri - Foggy - 50/40",
-                "Sat - Sunny - 60/50"
-        };
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
         ArrayList<String> weatherForecast = new ArrayList<>();
         forecastAdapter = new ArrayAdapter<String>(
@@ -69,10 +61,6 @@ public class ForecastFragment extends Fragment {
                 //data list
                 weatherForecast
         );
-
-        //fetch weather forecast for the current user preferences in the foreground
-        fetchWeatherForeCast();
-
         ListView forecastListView = (ListView)fragmentView.findViewById(R.id.listview_forecast);
         //set on item click listener
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -87,6 +75,13 @@ public class ForecastFragment extends Fragment {
         });
         forecastListView.setAdapter(forecastAdapter);
         return fragmentView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //fetch weather forecast for the current user preferences in the foreground
+        fetchWeatherForeCast();
     }
 
     @Override
@@ -316,8 +311,10 @@ public class ForecastFragment extends Fragment {
 
     private void fetchWeatherForeCast(){
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key), "");
-        String unitMetric = sharedPreferences.getString(getString(R.string.pref_units_key), "");
+        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        String unitMetric = sharedPreferences.getString(getString(R.string.pref_units_key),
+                getString(R.string.pref_units_default));
         FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
         fetchWeatherTask.execute(postalCode, unitMetric);
     }
