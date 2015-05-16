@@ -5,7 +5,8 @@
         android:title="@string/pref_location_title"
         android:defaultValue="@string/pref_location_default"
         android:summary="95134"
-        android:inputType="number"/>
+        android:inputType="number"
+        android:singleLine="true"/>
     <ListPreference
         android:key="pref_units"
         android:title="@string/pref_units_title"

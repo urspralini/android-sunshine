@@ -34,7 +34,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent settingsActivityIntent = new Intent(this, SettingsAcvitity.class);
+            Intent settingsActivityIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsActivityIntent);
             return true;
         }

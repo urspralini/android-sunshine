@@ -10,7 +10,7 @@ import android.preference.PreferenceManager;
 /**
  * Created by pbabu on 5/16/15.
  */
-public class SettingsAcvitity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String PREF_UNITS = "pref_units";
     public static final String PREF_LOCATION = "pref_location";
     @Override
