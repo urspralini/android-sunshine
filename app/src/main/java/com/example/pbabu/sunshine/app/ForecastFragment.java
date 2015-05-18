@@ -77,18 +77,44 @@ public class ForecastFragment extends Fragment {
         return fragmentView;
     }
 
+    public void onCreate(Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "ForecastFragment.onCreate");
+        super.onCreate(savedInstanceState);
+        //add this line to enable this fragment to handle menu events
+        setHasOptionsMenu(true);
+    }
+
     @Override
     public void onStart() {
+        Log.d(LOG_TAG, "ForecastFragment.onStart");
         super.onStart();
         //fetch weather forecast for the current user preferences in the foreground
         fetchWeatherForeCast();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //add this line to enable this fragment to handle menu events
-        setHasOptionsMenu(true);
+    public void onResume() {
+        Log.d(LOG_TAG, "ForecastFragment.onResume");
+        super.onResume();
+        fetchWeatherForeCast();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(LOG_TAG, "ForecastFragment.onPause");
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(LOG_TAG, "ForecastFragment.onStop");
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "ForecastFragment.onDestroy");
+        super.onDestroy();
     }
 
     @Override
@@ -110,12 +136,6 @@ public class ForecastFragment extends Fragment {
     @Override
     public void setHasOptionsMenu(boolean hasMenu) {
         super.setHasOptionsMenu(hasMenu);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        fetchWeatherForeCast();
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {

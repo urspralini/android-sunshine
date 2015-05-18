@@ -3,16 +3,50 @@ package com.example.pbabu.sunshine.app;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class ForecastDetailActivity extends ActionBarActivity {
 
+    private static final String LOG_TAG = ForecastDetailActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "ForecastDetailActivity.onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast_detail);
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d(LOG_TAG, "ForecastDetailActivity.onStart");
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d(LOG_TAG, "ForecastDetailActivity.onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d(LOG_TAG, "ForecastDetailActivity.onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(LOG_TAG, "ForecastDetailActivity.onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(LOG_TAG, "ForecastDetailActivity.onDestroy");
+        super.onDestroy();
     }
 
 
