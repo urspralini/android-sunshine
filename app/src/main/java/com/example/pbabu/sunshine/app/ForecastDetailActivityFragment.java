@@ -29,7 +29,38 @@ public class ForecastDetailActivityFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "ForecastDetailActivityFragment.onCreate");
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onStart() {
+        Log.d(LOG_TAG, "ForecastDetailActivityFragment.onStart");
+        super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(LOG_TAG, "ForecastDetailActivityFragment.onResume");
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(LOG_TAG, "ForecastDetailActivityFragment.onPause");
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        Log.d(LOG_TAG, "ForecastDetailActivityFragment.onStop");
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "ForecastDetailActivityFragment.onDestroy");
+        super.onDestroy();
     }
 
     @Override
@@ -61,7 +92,7 @@ public class ForecastDetailActivityFragment extends Fragment {
         Intent shareIntent = new Intent(Intent.ACTION_SEND)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
                 .setType("text/plain")
-                .putExtra(Intent.EXTRA_TEXT, mForecastStr+HASH_TAG);
+                .putExtra(Intent.EXTRA_TEXT, mForecastStr + HASH_TAG);
         return shareIntent;
     }
 }

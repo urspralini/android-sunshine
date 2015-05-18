@@ -4,20 +4,52 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class MainActivity extends ActionBarActivity {
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "MainActivity.onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //set default preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
 
+    @Override
+    protected void onStart() {
+        Log.d(LOG_TAG, "MainActivity.onStart");
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d(LOG_TAG, "MainActivity.onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d(LOG_TAG, "MainActivity.onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(LOG_TAG, "MainActivity.onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(LOG_TAG, "MainActivity.onDestroy");
+        super.onDestroy();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
