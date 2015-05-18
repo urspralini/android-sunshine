@@ -2,4 +2,18 @@
     <string name="app_name">Sunshine</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_refersh" translatable="false">Refresh</string>
+    <string name="title_activity_forecast_detail">ForecastDetailActivity</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="pref_location_title">Location</string>
+    <string name="pref_units_title">Temperature units</string>
+    <string name="pref_units_key" translatable="false">pref_units</string>
+    <string name="pref_location_key" translatable="false">pref_location</string>
+    <string name="pref_units_dialog_title">Pick your Units</string>
+    <string name="pref_location_default" translatable="false">95134</string>
+    <string name="pref_units_default" translatable="false">metric</string>
+    <string name="pref_units_imperial" translatable="false">imperial</string>
+    <string name="pref_units_metric" translatable="false">metric</string>
+    <string name="action_view_loc_on_map">View Location on Map</string>
+    <string name="action_share">Share</string>
 </resources>
