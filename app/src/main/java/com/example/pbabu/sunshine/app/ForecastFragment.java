@@ -1,7 +1,10 @@
 package com.example.pbabu.sunshine.app;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -12,8 +15,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,23 +42,15 @@ import java.util.List;
 public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> forecastAdapter;
-
+    private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     public ForecastFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        String[] sampleWeatherForecastArr = new String[]{
-                "Today - Sunny 88/63",
-                "Tomorrow - Rainy - 50/40",
-                "Weds - Foggy - 60/50",
-                "Thu - Sunny - 88/63",
-                "Fri - Foggy - 50/40",
-                "Sat - Sunny - 60/50"
-        };
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        ArrayList<String> sampleWeatherForecast = new ArrayList<>(Arrays.asList(sampleWeatherForecastArr));
+        ArrayList<String> weatherForecast = new ArrayList<>();
         forecastAdapter = new ArrayAdapter<String>(
                 //current context,fragment's parent activity
                 getActivity(),
@@ -62,11 +59,29 @@ public class ForecastFragment extends Fragment {
                 //id of text view to populate
                 R.id.list_item_forecast_textview,
                 //data list
-                sampleWeatherForecast
+                weatherForecast
         );
         ListView forecastListView = (ListView)fragmentView.findViewById(R.id.listview_forecast);
+        //set on item click listener
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //start detail activity using explicit intent.
+                String forecastText = forecastAdapter.getItem(position);
+                Intent detailActivityIntent = new Intent(view.getContext(), ForecastDetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, forecastText);
+                startActivity(detailActivityIntent);
+            }
+        });
         forecastListView.setAdapter(forecastAdapter);
         return fragmentView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //fetch weather forecast for the current user preferences in the foreground
+        fetchWeatherForeCast();
     }
 
     @Override
@@ -84,10 +99,10 @@ public class ForecastFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_refresh) {
-            final String MV_POSTAL_CODE = "94043";
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute(MV_POSTAL_CODE);
+            fetchWeatherForeCast();
             return true;
+        }else if (item.getItemId() == R.id.action_view_loc_on_map) {
+            showLocationOnMap();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -95,6 +110,12 @@ public class ForecastFragment extends Fragment {
     @Override
     public void setHasOptionsMenu(boolean hasMenu) {
         super.setHasOptionsMenu(hasMenu);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchWeatherForeCast();
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -105,13 +126,13 @@ public class ForecastFragment extends Fragment {
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-
             final String DEFAULT_POSTAL_CODE = "95134"; // default postal code
-            String postalCode = null;
-            if(params == null || params.length == 0){
-                postalCode = DEFAULT_POSTAL_CODE;
-            }else {
-                postalCode = params[0];
+            String postalCode = DEFAULT_POSTAL_CODE;
+            String unitMetric = "metric";
+            if(params != null && params.length>=1){
+                if(!params[0].isEmpty()){
+                    postalCode = params[0];
+                }
             }
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
@@ -126,7 +147,6 @@ public class ForecastFragment extends Fragment {
                 final String UNITS_PARAM = "units";
                 final String CNT_PARAM = "cnt";
                 final String modeJson = "json";
-                String unitMetric = "metric";
                 int numOfDays = 7;
                 Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, postalCode)
@@ -210,11 +230,16 @@ public class ForecastFragment extends Fragment {
         /**
          * Prepare the weather high/lows for presentation.
          */
-        private String formatHighLows(double high, double low) {
+        private String formatHighLows(double high, double low, String unitType) {
+            if (unitType.equals(getString(R.string.pref_units_imperial))) {
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if (!unitType.equals(getString(R.string.pref_units_metric))) {
+                Log.d(LOG_TAG, "Unit type not found: " + unitType);
+            }
             // For presentation, assume the user doesn't care about tenths of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
-
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
         }
@@ -285,11 +310,41 @@ public class ForecastFragment extends Fragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                //fetch temperature unit type from preferences
+                final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String unitType = sharedPreferences.getString(getString(R.string.pref_units_key),
+                        getString(R.string.pref_units_default));
+                highAndLow = formatHighLows(high, low, unitType);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
             return resultStrs;
 
+        }
+    }
+
+    private void fetchWeatherForeCast(){
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        fetchWeatherTask.execute(postalCode);
+    }
+
+    private void showLocationOnMap(){
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        //create an implicit intent to open the location on the map
+        Uri locationUri = Uri.parse("geo:0,0?")
+                .buildUpon()
+                .appendQueryParameter("q", postalCode)
+                .build();
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW)
+                .setData(locationUri);
+        if(mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivity(mapIntent);
+        }else {
+            Log.d(LOG_TAG, "Could not call map view intent for location:" + postalCode);
         }
     }
 }
