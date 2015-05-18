@@ -15,6 +15,7 @@
  */
 package com.example.pbabu.sunshine.app.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
@@ -55,9 +56,7 @@ public class TestDb extends AndroidTestCase {
         tableNameHashSet.add(WeatherContract.LocationEntry.TABLE_NAME);
         tableNameHashSet.add(WeatherContract.WeatherEntry.TABLE_NAME);
 
-        mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
-        SQLiteDatabase db = new WeatherDbHelper(
-                this.mContext).getWritableDatabase();
+        SQLiteDatabase db = getSqLiteDatabase();
         assertEquals(true, db.isOpen());
 
         // have we created the tables we want?
@@ -82,14 +81,7 @@ public class TestDb extends AndroidTestCase {
 
         assertTrue("Error: This means that we were unable to query the database for table information.",
                 c.moveToFirst());
-
-        // Build a HashSet of all of the column names we want to look for
-        final HashSet<String> locationColumnHashSet = new HashSet<String>();
-        locationColumnHashSet.add(WeatherContract.LocationEntry._ID);
-        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_CITY_NAME);
-        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_COORD_LAT);
-        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_COORD_LONG);
-        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING);
+        final HashSet<String> locationColumnHashSet = getLocationColumns();
 
         int columnNameIndex = c.getColumnIndex("name");
         do {
@@ -112,22 +104,32 @@ public class TestDb extends AndroidTestCase {
     */
     public void testLocationTable() {
         // First step: Get reference to writable database
-
+        SQLiteDatabase db = getSqLiteDatabase();
+        assertEquals(true, db.isOpen());
         // Create ContentValues of what you want to insert
         // (you can use the createNorthPoleLocationValues if you wish)
-
+        ContentValues locationData = TestUtilities.createNorthPoleLocationValues();
         // Insert ContentValues into database and get a row ID back
-
+        final long location_id = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, locationData);
         // Query the database and receive a Cursor back
-
+        Cursor cursor = db.rawQuery("SELECT * from " + WeatherContract.LocationEntry.TABLE_NAME +
+                " WHERE " + WeatherContract.LocationEntry._ID + " = '" + location_id + "'", null);
         // Move the cursor to a valid database row
-
+        cursor.moveToFirst();
         // Validate data in resulting Cursor with the original ContentValues
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
-
         // Finally, close the cursor and database
-
+        int columnNameIndex = cursor.getColumnIndex(WeatherContract.LocationEntry._ID);
+        assertTrue("Location id is not same", cursor.getLong(columnNameIndex) == location_id);
+        columnNameIndex = cursor.getColumnIndex(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING);
+        assertTrue("Location setting is not same",
+                cursor.getString(columnNameIndex)
+                        .equals(locationData
+                                .getAsString(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING)));
+        columnNameIndex = cursor.getColumnIndex(WeatherContract.LocationEntry.COLUMN_COORD_LAT);
+        assertTrue("Location latitude is not same",
+                cursor.getDouble(columnNameIndex) == locationData.getAsDouble(WeatherContract.LocationEntry.COLUMN_COORD_LAT));
     }
 
     /*
@@ -171,5 +173,23 @@ public class TestDb extends AndroidTestCase {
      */
     public long insertLocation() {
         return -1L;
+    }
+
+
+    private SQLiteDatabase getSqLiteDatabase() {
+        mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
+        return new WeatherDbHelper(
+                this.mContext).getWritableDatabase();
+    }
+
+    private HashSet<String> getLocationColumns() {
+        // Build a HashSet of all of the column names we want to look for
+        final HashSet<String> locationColumnHashSet = new HashSet<String>();
+        locationColumnHashSet.add(WeatherContract.LocationEntry._ID);
+        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_CITY_NAME);
+        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_COORD_LAT);
+        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_COORD_LONG);
+        locationColumnHashSet.add(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING);
+        return locationColumnHashSet;
     }
 }
