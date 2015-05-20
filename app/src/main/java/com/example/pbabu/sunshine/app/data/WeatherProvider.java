@@ -121,12 +121,11 @@ public class WeatherProvider extends ContentProvider {
 
         // 2) Use the addURI function to match each of the types.  Use the constants from
         // WeatherContract to help define the types to the UriMatcher.
-        uriMatcher.addURI(WeatherContract.CONTENT_AUTHORITY, WeatherContract.PATH_WEATHER, WEATHER);
-        uriMatcher.addURI(WeatherContract.CONTENT_AUTHORITY,
-                WeatherContract.PATH_WEATHER + "/*", WEATHER_WITH_LOCATION);
-        uriMatcher.addURI(WeatherContract.CONTENT_AUTHORITY,
-                WeatherContract.PATH_WEATHER + "/*" + "/#", WEATHER_WITH_LOCATION_AND_DATE);
-        uriMatcher.addURI(WeatherContract.CONTENT_AUTHORITY, WeatherContract.PATH_LOCATION, LOCATION);
+        final String contentAuthority = WeatherContract.CONTENT_AUTHORITY;
+        uriMatcher.addURI(contentAuthority, WeatherContract.PATH_WEATHER, WEATHER);
+        uriMatcher.addURI(contentAuthority, WeatherContract.PATH_WEATHER + "/*", WEATHER_WITH_LOCATION);
+        uriMatcher.addURI(contentAuthority, WeatherContract.PATH_WEATHER + "/*/#", WEATHER_WITH_LOCATION_AND_DATE);
+        uriMatcher.addURI(contentAuthority, WeatherContract.PATH_LOCATION, LOCATION);
         // 3) Return the new matcher!
         return uriMatcher;
     }
