@@ -186,12 +186,12 @@ public class WeatherProvider extends ContentProvider {
             }
             // "weather"
             case WEATHER: {
-                retCursor = null;
+                retCursor = getAllRecordsFor(WeatherContract.WeatherEntry.TABLE_NAME);
                 break;
             }
             // "location"
             case LOCATION: {
-                retCursor = null;
+                retCursor = getAllRecordsFor(WeatherContract.LocationEntry.TABLE_NAME);
                 break;
             }
 
@@ -200,6 +200,10 @@ public class WeatherProvider extends ContentProvider {
         }
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
+    }
+
+    private Cursor getAllRecordsFor(String tableName){
+        return mOpenHelper.getReadableDatabase().query(tableName, null, null,null,null,null,null);
     }
 
     /*
