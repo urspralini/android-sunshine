@@ -18,14 +18,17 @@ package com.example.pbabu.sunshine.app.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
-import com.example.android.sunshine.app.data.WeatherContract.LocationEntry;
-import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
+import com.example.pbabu.sunshine.app.data.WeatherContract.LocationEntry;
+import com.example.pbabu.sunshine.app.data.WeatherContract.WeatherEntry;
 
 /**
  * Manages a local database for weather data.
  */
 public class WeatherDbHelper extends SQLiteOpenHelper {
+
+    private static final String LOG_TAG = WeatherDbHelper.class.getSimpleName();
 
     // If you change the database schema, you must increment the database version.
     private static final int DATABASE_VERSION = 2;
@@ -69,6 +72,17 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
                 " UNIQUE (" + WeatherEntry.COLUMN_DATE + ", " +
                 WeatherEntry.COLUMN_LOC_KEY + ") ON CONFLICT REPLACE);";
 
+        final String SQL_CREATE_LOCATION_TABLE = "CREATE TABLE " + LocationEntry.TABLE_NAME + " ( " +
+                LocationEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                LocationEntry.COLUMN_LOCATION_SETTING + " INTEGER NOT NULL, " +
+                LocationEntry.COLUMN_CITY_NAME + " TEXT NOT NULL, " +
+                LocationEntry.COLUMN_COORD_LAT + " REAL NOT NULL, " +
+                LocationEntry.COLUMN_COORD_LONG + " REAL NOT NULL, " +
+                " UNIQUE (" + LocationEntry.COLUMN_LOCATION_SETTING + "));";
+
+        Log.d(LOG_TAG, "Weather create table query:" + SQL_CREATE_WEATHER_TABLE);
+        Log.d(LOG_TAG, "Location create table query:" + SQL_CREATE_LOCATION_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_LOCATION_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
     }
 
