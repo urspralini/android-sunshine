@@ -186,12 +186,14 @@ public class WeatherProvider extends ContentProvider {
             }
             // "weather"
             case WEATHER: {
-                retCursor = getAllRecordsFor(WeatherContract.WeatherEntry.TABLE_NAME);
+                retCursor = getAllRecordsFor(WeatherContract.WeatherEntry.TABLE_NAME,
+                        projection,selection,selectionArgs,sortOrder);
                 break;
             }
             // "location"
             case LOCATION: {
-                retCursor = getAllRecordsFor(WeatherContract.LocationEntry.TABLE_NAME);
+                retCursor = getAllRecordsFor(WeatherContract.LocationEntry.TABLE_NAME,
+                        projection,selection,selectionArgs,sortOrder);
                 break;
             }
 
@@ -202,8 +204,9 @@ public class WeatherProvider extends ContentProvider {
         return retCursor;
     }
 
-    private Cursor getAllRecordsFor(String tableName){
-        return mOpenHelper.getReadableDatabase().query(tableName, null, null,null,null,null,null);
+    private Cursor getAllRecordsFor(String tableName, String[] projection, String selection, String[] selectionArgs, String sortOrder){
+        return mOpenHelper.getReadableDatabase().query(tableName, projection,
+                selection,selectionArgs, null,null,sortOrder);
     }
 
     /*
@@ -225,10 +228,20 @@ public class WeatherProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
+            case LOCATION: {
+                long _id = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, values);
+                if ( _id > 0 )
+                    returnUri = WeatherContract.LocationEntry.buildLocationUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
+        db.close();
         return returnUri;
     }
 
