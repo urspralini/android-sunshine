@@ -20,7 +20,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.content.CursorLoader;
 import com.example.pbabu.sunshine.app.data.WeatherContract;
 
 import org.json.JSONArray;
@@ -42,8 +45,8 @@ import java.util.List;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ForecastFragment extends Fragment {
-
+public class ForecastFragment extends Fragment implements android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor>{
+    private static final int FORECAST_LOADER = 0;
     private ForecastAdapter forecastAdapter;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     public ForecastFragment() {
@@ -53,14 +56,7 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        String locationSetting = Utility.getPreferredLocation(getActivity());
-        // Sort order:  Ascending, by date.
-        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-                locationSetting, System.currentTimeMillis());
-        Cursor cur = getActivity().getContentResolver().query(weatherForLocationUri,
-                null, null, null, sortOrder);
-        forecastAdapter = new ForecastAdapter(getActivity(), cur, 0);
+        forecastAdapter = new ForecastAdapter(getActivity(), null, 0);
         ListView forecastListView = (ListView)fragmentView.findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
         return fragmentView;
@@ -71,6 +67,12 @@ public class ForecastFragment extends Fragment {
         super.onCreate(savedInstanceState);
         //add this line to enable this fragment to handle menu events
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }
 
     @Override
@@ -147,5 +149,25 @@ public class ForecastFragment extends Fragment {
         }else {
             Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String locationSetting = Utility.getPreferredLocation(getActivity());
+        // Sort order:  Ascending, by date.
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                locationSetting, System.currentTimeMillis());
+        return new CursorLoader(getActivity(), weatherForLocationUri,null, null, null, sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        forecastAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        forecastAdapter.swapCursor(null);
     }
 }
