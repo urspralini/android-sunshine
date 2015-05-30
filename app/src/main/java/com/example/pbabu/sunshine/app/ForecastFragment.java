@@ -103,16 +103,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStart() {
         Log.d(LOG_TAG, "ForecastFragment.onStart");
         super.onStart();
-        //fetch weather forecast for the current user preferences in the foreground
-        //fetchWeatherForeCast();
     }
 
     @Override
     public void onResume() {
         Log.d(LOG_TAG, "ForecastFragment.onResume");
         super.onResume();
-        //fetch weather forecast for the current user preferences in the foreground
-        fetchWeatherForeCast();
     }
 
     @Override
@@ -194,5 +190,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         forecastAdapter.swapCursor(null);
+    }
+
+    public void onLocationChanged() {
+        fetchWeatherForeCast();
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 }
