@@ -107,10 +107,10 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
         inflater.inflate(R.menu.forecast_detail_fragment, menu);
         MenuItem shareMenuItem = menu.findItem(R.id.action_share);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareMenuItem);
-        if(mShareActionProvider != null) {
+        if(mShareActionProvider != null && mForecastStr != null) {
             mShareActionProvider.setShareIntent(buildShareIntent());
         }else {
-            Log.d(LOG_TAG, "share action provider is null?");
+            Log.d(LOG_TAG, "share action provider is null or forecast string is null?");
         }
     }
 
@@ -128,6 +128,10 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
         mForecastStr = convertCursorRowToUXFormat(cursor);
         TextView textView = (TextView) getView().findViewById(R.id.detail_text);
         textView.setText(mForecastStr);
+        //If onCreateOptionsMenu has already happened, then we need to update the shareIntent
+        if(mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(buildShareIntent());
+        }
     }
 
     @Override
