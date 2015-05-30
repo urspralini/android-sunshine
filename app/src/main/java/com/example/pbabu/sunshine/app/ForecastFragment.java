@@ -2,6 +2,7 @@ package com.example.pbabu.sunshine.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -19,6 +20,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.example.pbabu.sunshine.app.data.WeatherContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +44,7 @@ import java.util.List;
  */
 public class ForecastFragment extends Fragment {
 
-    private ArrayAdapter<String> forecastAdapter;
+    private ForecastAdapter forecastAdapter;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     public ForecastFragment() {
     }
@@ -50,29 +53,15 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        ArrayList<String> weatherForecast = new ArrayList<>();
-        forecastAdapter = new ArrayAdapter<String>(
-                //current context,fragment's parent activity
-                getActivity(),
-                //id of list item layout
-                R.layout.list_item_forecast,
-                //id of text view to populate
-                R.id.list_item_forecast_textview,
-                //data list
-                weatherForecast
-        );
+        String locationSetting = Utility.getPreferredLocation(getActivity());
+        // Sort order:  Ascending, by date.
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                locationSetting, System.currentTimeMillis());
+        Cursor cur = getActivity().getContentResolver().query(weatherForLocationUri,
+                null, null, null, sortOrder);
+        forecastAdapter = new ForecastAdapter(getActivity(), cur, 0);
         ListView forecastListView = (ListView)fragmentView.findViewById(R.id.listview_forecast);
-        //set on item click listener
-        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //start detail activity using explicit intent.
-                String forecastText = forecastAdapter.getItem(position);
-                Intent detailActivityIntent = new Intent(view.getContext(), ForecastDetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, forecastText);
-                startActivity(detailActivityIntent);
-            }
-        });
         forecastListView.setAdapter(forecastAdapter);
         return fragmentView;
     }
@@ -139,28 +128,24 @@ public class ForecastFragment extends Fragment {
     }
 
     private void fetchWeatherForeCast(){
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
-                getString(R.string.pref_location_default));
-        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity(),forecastAdapter);
-        fetchWeatherTask.execute(postalCode);
+        String location = Utility.getPreferredLocation(getActivity());
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity());
+        fetchWeatherTask.execute(location);
     }
 
     private void showLocationOnMap(){
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String postalCode = sharedPreferences.getString(getString(R.string.pref_location_key),
-                getString(R.string.pref_location_default));
+        String location = Utility.getPreferredLocation(getActivity());
         //create an implicit intent to open the location on the map
         Uri locationUri = Uri.parse("geo:0,0?")
                 .buildUpon()
-                .appendQueryParameter("q", postalCode)
+                .appendQueryParameter("q", location)
                 .build();
         Intent mapIntent = new Intent(Intent.ACTION_VIEW)
                 .setData(locationUri);
         if(mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(mapIntent);
         }else {
-            Log.d(LOG_TAG, "Could not call map view intent for location:" + postalCode);
+            Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
         }
     }
 }
