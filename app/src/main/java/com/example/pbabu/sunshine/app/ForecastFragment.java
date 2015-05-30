@@ -1,14 +1,13 @@
 package com.example.pbabu.sunshine.app;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.text.format.Time;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,39 +16,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.content.CursorLoader;
+
 import com.example.pbabu.sunshine.app.data.WeatherContract;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ForecastFragment extends Fragment implements android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor>{
+public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int FORECAST_LOADER = 0;
     private ForecastAdapter forecastAdapter;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
-    private static final String[] FORECAST_COLUMNS = {
+    static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
             // the content provider joins the location & weather tables in the background
             // (both have an _id column)
@@ -78,6 +57,7 @@ public class ForecastFragment extends Fragment implements android.support.v4.app
     static final int COL_WEATHER_CONDITION_ID = 6;
     static final int COL_COORD_LAT = 7;
     static final int COL_COORD_LONG = 8;
+
     public ForecastFragment() {
     }
 
@@ -86,8 +66,23 @@ public class ForecastFragment extends Fragment implements android.support.v4.app
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
         forecastAdapter = new ForecastAdapter(getActivity(), null, 0);
-        ListView forecastListView = (ListView)fragmentView.findViewById(R.id.listview_forecast);
+        ListView forecastListView = (ListView) fragmentView.findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
+        //add item click listener
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null) {
+                    Long weatherDate = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
+                    String location = Utility.getPreferredLocation(getActivity());
+                    Uri detailedLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, weatherDate);
+                    Intent detailIntent = new Intent(getActivity(), ForecastDetailActivity.class);
+                    detailIntent.setData(detailedLocationUri);
+                    startActivity(detailIntent);
+                }
+            }
+        });
         return fragmentView;
     }
 
@@ -145,10 +140,10 @@ public class ForecastFragment extends Fragment implements android.support.v4.app
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.action_refresh) {
+        if (item.getItemId() == R.id.action_refresh) {
             fetchWeatherForeCast();
             return true;
-        }else if (item.getItemId() == R.id.action_view_loc_on_map) {
+        } else if (item.getItemId() == R.id.action_view_loc_on_map) {
             showLocationOnMap();
         }
         return super.onOptionsItemSelected(item);
@@ -159,13 +154,13 @@ public class ForecastFragment extends Fragment implements android.support.v4.app
         super.setHasOptionsMenu(hasMenu);
     }
 
-    private void fetchWeatherForeCast(){
+    private void fetchWeatherForeCast() {
         String location = Utility.getPreferredLocation(getActivity());
         FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity());
         fetchWeatherTask.execute(location);
     }
 
-    private void showLocationOnMap(){
+    private void showLocationOnMap() {
         String location = Utility.getPreferredLocation(getActivity());
         //create an implicit intent to open the location on the map
         Uri locationUri = Uri.parse("geo:0,0?")
@@ -174,9 +169,9 @@ public class ForecastFragment extends Fragment implements android.support.v4.app
                 .build();
         Intent mapIntent = new Intent(Intent.ACTION_VIEW)
                 .setData(locationUri);
-        if(mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+        if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(mapIntent);
-        }else {
+        } else {
             Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
         }
     }
@@ -188,7 +183,7 @@ public class ForecastFragment extends Fragment implements android.support.v4.app
         String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
                 locationSetting, System.currentTimeMillis());
-        return new CursorLoader(getActivity(), weatherForLocationUri,FORECAST_COLUMNS, null, null, sortOrder);
+        return new CursorLoader(getActivity(), weatherForLocationUri, FORECAST_COLUMNS, null, null, sortOrder);
     }
 
     @Override
