@@ -11,6 +11,9 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <!-- Register weather content provider -->
+        <provider android:name=".data.WeatherProvider"
+            android:authorities="com.example.pbabu.sunshine.app"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
