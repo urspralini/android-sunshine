@@ -1,8 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/list_item_forecast_textview"
+    android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:gravity="center_vertical">
-</TextView>
+    android:padding="16dp">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/list_item_icon"
+        android:src="@drawable/ic_launcher"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingLeft="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/list_item_date_textview"
+            android:text="Tommorrow"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/list_item_forecast_textview"
+            android:text="clear"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/list_item_high_textview"
+            android:text="28"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/list_item_low_textview"
+            android:text="10"
+            />
+    </LinearLayout>
+</LinearLayout>
