@@ -19,6 +19,8 @@ import com.example.pbabu.sunshine.app.data.WeatherContract;
  * from a {@link android.database.Cursor} to a {@link android.widget.ListView}.
  */
 public class ForecastAdapter extends CursorAdapter {
+    private static final int FORECAST_VIEW_TYPE_TODAY = 0;
+    private static final int FORECAST_VIEW_TYPE_FUTURE = 1;
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
@@ -52,7 +54,10 @@ public class ForecastAdapter extends CursorAdapter {
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_item_forecast, parent, false);
+        int viewType = getItemViewType(cursor.getPosition());
+        int layoutId = (viewType == FORECAST_VIEW_TYPE_TODAY) ?
+                R.layout.list_item_forecast_today : R.layout.list_item_forecast;
+        View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
         return view;
     }
 
@@ -69,7 +74,7 @@ public class ForecastAdapter extends CursorAdapter {
         final long dateInMillisecs = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
         //set date text view
         TextView dateView = (TextView)view.findViewById(R.id.list_item_date_textview);
-        dateView.setText(Utility.getFriendlyDayString(this.mContext,dateInMillisecs));
+        dateView.setText(Utility.getFriendlyDayString(this.mContext, dateInMillisecs));
 
         boolean isMetric = Utility.isMetric(this.mContext);
         //get max temp from cursor
@@ -90,5 +95,15 @@ public class ForecastAdapter extends CursorAdapter {
         TextView descTextView = (TextView)view.findViewById(R.id.list_item_forecast_textview);
         descTextView.setText(desc);
 
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return (position == 0)? FORECAST_VIEW_TYPE_TODAY: FORECAST_VIEW_TYPE_FUTURE;
     }
 }
