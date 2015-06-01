@@ -48,10 +48,13 @@ public class ForecastAdapter extends CursorAdapter {
         //bind the view with values from the database
         final int weatherConditionId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
         int weatherImageId = -1;
-        if(cursor.getPosition() == 0){
-            weatherImageId = Utility.getArtResourceForWeatherCondition(weatherConditionId);
-        }else {
-            weatherImageId = Utility.getIconResourceForWeatherCondition(weatherConditionId);
+        switch(getItemViewType(cursor.getPosition())){
+            case FORECAST_VIEW_TYPE_TODAY:
+                weatherImageId = Utility.getArtResourceForWeatherCondition(weatherConditionId);
+                break;
+            case FORECAST_VIEW_TYPE_FUTURE:
+                weatherImageId = Utility.getIconResourceForWeatherCondition(weatherConditionId);
+                break;
         }
         viewHolder.iconView.setImageResource(weatherImageId);
         //get date from cursor
