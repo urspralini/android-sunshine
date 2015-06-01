@@ -47,7 +47,9 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
             WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
             WeatherContract.WeatherEntry.COLUMN_PRESSURE,
             WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
-            WeatherContract.WeatherEntry.COLUMN_DEGREES
+            WeatherContract.WeatherEntry.COLUMN_DEGREES,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
+
     };
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
@@ -60,7 +62,9 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
     static final int COL_WEATHER_HUMIDITY = 5;
     static final int COL_WEATHER_PRESSURE = 6;
     static final int COL_WEATHER_WIND_SPEED = 7;
-    static final int COL_WEATHER_DEGREES = 7;
+    static final int COL_WEATHER_DEGREES = 8;
+    static final int COL_WEATHER_CONDITION_ID = 9;
+
     private TextView dayTextView;
     private TextView dateTextView;
     private TextView highTextView;
@@ -177,7 +181,8 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
         final double lowTemp = cursor.getDouble(COL_WEATHER_MIN_TEMP);
         lowTextView.setText(Utility.formatTemperature(context, lowTemp, isMetric));
         //set the weather icon
-        iconView.setImageResource(R.drawable.ic_launcher);
+        final int weatherConditionId = cursor.getInt(COL_WEATHER_CONDITION_ID);
+        iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherConditionId));
         //set desc
         final String description = cursor.getString(COL_WEATHER_DESC);
         descTextView.setText(description);

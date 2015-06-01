@@ -3,7 +3,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_refersh" translatable="false">Refresh</string>
-    <string name="title_activity_forecast_detail">ForecastDetailActivity</string>
+    <string name="title_activity_forecast_detail">Detail Forecast</string>
     <string name="title_activity_settings">Settings</string>
     <string name="pref_location_title">Location</string>
     <string name="pref_units_title">Temperature units</string>
