@@ -152,7 +152,8 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
      */
     private String formatHighLows(double high, double low) {
         boolean isMetric = Utility.isMetric(getActivity());
-        String highLowStr = Utility.formatTemperature(high, isMetric) + "/" + Utility.formatTemperature(low, isMetric);
+        String highLowStr = Utility.formatTemperature(this.getActivity(), high, isMetric) + "/" +
+                Utility.formatTemperature(this.getActivity(), low, isMetric);
         return highLowStr;
     }
 

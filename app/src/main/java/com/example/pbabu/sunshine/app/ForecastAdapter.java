@@ -25,30 +25,6 @@ public class ForecastAdapter extends CursorAdapter {
         super(context, c, flags);
     }
 
-    /**
-     * Prepare the weather high/lows for presentation.
-     */
-    private String formatHighLows(double high, double low) {
-        boolean isMetric = Utility.isMetric(mContext);
-        String highLowStr = Utility.formatTemperature(high, isMetric) + "/" + Utility.formatTemperature(low, isMetric);
-        return highLowStr;
-    }
-
-    /*
-        This is ported from FetchWeatherTask --- but now we go straight from the cursor to the
-        string.
-     */
-    private String convertCursorRowToUXFormat(Cursor cursor) {
-        // get row indices for our cursor
-        String highAndLow = formatHighLows(
-                cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP),
-                cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP));
-
-        return Utility.formatDate(cursor.getLong(ForecastFragment.COL_WEATHER_DATE)) +
-                " - " + cursor.getString(ForecastFragment.COL_WEATHER_DESC) +
-                " - " + highAndLow;
-    }
-
     /*
         Remember that these views are reused as needed.
      */
@@ -80,12 +56,12 @@ public class ForecastAdapter extends CursorAdapter {
         //get max temp from cursor
         final Double maxTemp = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
         //set high temp text view
-        viewHolder.highTextView.setText(Utility.formatTemperature(maxTemp, isMetric));
+        viewHolder.highTextView.setText(Utility.formatTemperature(context, maxTemp, isMetric));
 
         //get min temp from cursor
         final double lowTemp = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
         //set low temp text view
-        viewHolder.lowTextView.setText(Utility.formatTemperature(lowTemp, isMetric));
+        viewHolder.lowTextView.setText(Utility.formatTemperature(context, lowTemp, isMetric));
 
         //get weather description from cursor
         final String desc = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
