@@ -17,6 +17,12 @@ public class ForecastDetailActivity extends ActionBarActivity {
         Log.d(LOG_TAG, "ForecastDetailActivity.onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast_detail);
+        if(savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.weather_detail_container, new ForecastDetailActivityFragment())
+                    .commit();
+        }
     }
 
     @Override
