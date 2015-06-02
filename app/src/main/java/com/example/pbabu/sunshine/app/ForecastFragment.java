@@ -1,5 +1,6 @@
 package com.example.pbabu.sunshine.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -28,6 +29,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private static final int FORECAST_LOADER = 0;
     private ForecastAdapter forecastAdapter;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
+    private Callback mCallback = null;
     static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
             // the content provider joins the location & weather tables in the background
@@ -60,6 +62,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_HUMIDITY = 9;
     static final int COL_PRESSURE = 10;
     static final int COL_WIND_SPEED = 11;
+    private ListView forecastListView;
 
     public ForecastFragment() {
     }
@@ -68,8 +71,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        forecastAdapter = new ForecastAdapter(getActivity(), null, 0);
-        ListView forecastListView = (ListView) fragmentView.findViewById(R.id.listview_forecast);
+        forecastAdapter = new ForecastAdapter((MainActivity)getActivity(), null, 0);
+        forecastListView = (ListView) fragmentView.findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(forecastAdapter);
         //add item click listener
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -80,9 +83,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     Long weatherDate = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
                     String location = Utility.getPreferredLocation(getActivity());
                     Uri detailedLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, weatherDate);
-                    Intent detailIntent = new Intent(getActivity(), ForecastDetailActivity.class);
-                    detailIntent.setData(detailedLocationUri);
-                    startActivity(detailIntent);
+                    mCallback.onItemSelected(detailedLocationUri);
                 }
             }
         });
@@ -198,5 +199,27 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLocationChanged() {
         fetchWeatherForeCast();
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try{
+            mCallback = (Callback)activity;
+        }catch (ClassCastException exception){
+            throw new ClassCastException(activity.toString() + " must implement " + Callback.class.getSimpleName());
+        }
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Uri dateUri);
     }
 }

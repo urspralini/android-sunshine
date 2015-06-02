@@ -2,6 +2,7 @@ package com.example.pbabu.sunshine.app;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -11,8 +12,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.pbabu.sunshine.app.data.WeatherContract;
 
-public class MainActivity extends ActionBarActivity {
+
+public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private String mLocation;
     private boolean mTwoPane;
@@ -54,7 +57,14 @@ public class MainActivity extends ActionBarActivity {
         if(!mLocation.equals(locationSetting)){
             //do something
             ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
-            ff.onLocationChanged();
+            if(ff != null) {
+                ff.onLocationChanged();
+            }
+            ForecastDetailActivityFragment df = (ForecastDetailActivityFragment)getSupportFragmentManager()
+                    .findFragmentByTag(DETAIL_FRAGMENT_TAG);
+            if(df != null) {
+                df.onLocationChanged(locationSetting);
+            }
             mLocation = locationSetting;
         }
     }
@@ -97,5 +107,24 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(Uri detailWeatherUri) {
+        if(mTwoPane){
+            ForecastDetailActivityFragment detailFragment = ForecastDetailActivityFragment
+                    .newInstance(detailWeatherUri);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, detailFragment, DETAIL_FRAGMENT_TAG)
+                    .commit();
+        }else {
+            Intent detailIntent = new Intent(this, ForecastDetailActivity.class);
+            detailIntent.setData(detailWeatherUri);
+            startActivity(detailIntent);
+        }
+    }
+
+    public boolean isTwoPane(){
+        return mTwoPane;
     }
 }

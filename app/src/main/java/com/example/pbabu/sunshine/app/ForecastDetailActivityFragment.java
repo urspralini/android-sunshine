@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -30,7 +31,9 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
     private static final String LOG_TAG = ForecastDetailActivityFragment.class.getSimpleName();
     private static final int FORECAST_LOADER = 0;
     private static final String HASH_TAG = "#sunshineApp";
+    private static final String ARG_URI_STR = "weatherDetailUriStr";
     private String mForecastStr;
+    private Uri mUri;
     private ShareActionProvider mShareActionProvider;
     private static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
@@ -80,6 +83,14 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
         setHasOptionsMenu(true);
     }
 
+    public static ForecastDetailActivityFragment newInstance(Uri detailWeatherUri){
+        ForecastDetailActivityFragment fragment = new ForecastDetailActivityFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_URI_STR, detailWeatherUri);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(LOG_TAG, "ForecastDetailActivityFragment.onCreate");
@@ -119,6 +130,10 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        final Bundle arguments = getArguments();
+        if(arguments != null) {
+            mUri = (Uri) arguments.getParcelable(ARG_URI_STR);
+        }
         View detailForecastView = inflater.inflate(R.layout.fragment_forecast_detail, container, false);
         context = detailForecastView.getContext();
         dayTextView = (TextView) detailForecastView.findViewById(R.id.list_item_day_textview);
@@ -140,6 +155,10 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Bundle args = getArguments();
+        if(args != null && args.getString(ARG_URI_STR) != null) {
+            mUri = Uri.parse(args.getString(ARG_URI_STR));
+        }
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }
 
@@ -157,9 +176,8 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        final Intent intent = getActivity().getIntent();
-        if(intent == null || intent.getData() == null) return null;
-        return new CursorLoader(getActivity(), intent.getData(), FORECAST_COLUMNS, null, null, null);
+        if(mUri == null) return null;
+        return new CursorLoader(getActivity(), mUri, FORECAST_COLUMNS, null, null, null);
     }
 
     @Override
@@ -237,5 +255,12 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
         return Utility.formatDate(cursor.getLong(COL_WEATHER_DATE)) +
                 " - " + cursor.getString(COL_WEATHER_DESC) +
                 " - " + highAndLow;
+    }
+
+    public void onLocationChanged(String location) {
+        //get the date from the current uri
+        final long currentDate = WeatherContract.WeatherEntry.getDateFromUri(mUri);
+        mUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, currentDate);
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 }
