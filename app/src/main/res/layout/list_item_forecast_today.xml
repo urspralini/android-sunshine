@@ -21,7 +21,7 @@
             android:id="@+id/list_item_date_textview"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/sunshine_white"
+            android:textColor="@color/white"
             />
         <TextView
             android:layout_width="match_parent"
@@ -29,7 +29,7 @@
             android:id="@+id/list_item_high_textview"
             android:fontFamily="sans-serif-light"
             android:textSize="72sp"
-            android:textColor="@color/sunshine_white"
+            android:textColor="@color/white"
             />
         <TextView
             android:layout_width="match_parent"
@@ -37,7 +37,7 @@
             android:id="@+id/list_item_low_textview"
             android:fontFamily="sans-serif-light"
             android:textSize="36sp"
-            android:textColor="@color/sunshine_white"
+            android:textColor="@color/white"
             android:layout_marginLeft="8dp"
             />
     </LinearLayout>
@@ -58,7 +58,7 @@
             android:id="@+id/list_item_forecast_textview"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/sunshine_white"
+            android:textColor="@color/white"
             android:layout_gravity="center_horizontal"
             />
     </LinearLayout>
