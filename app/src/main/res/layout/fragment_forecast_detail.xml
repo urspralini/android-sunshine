@@ -11,13 +11,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_day_textview"
-            android:text="Today"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_date_textview"
-            android:text="May 25"
             />
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,13 +31,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/list_item_high_textview"
-                    android:text="28"
                     />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/list_item_low_textview"
-                    android:text="10"
                     />
             </LinearLayout>
             <LinearLayout
@@ -57,7 +53,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/list_item_forecast_textview"
-                    android:text="Sunny"
                     />
             </LinearLayout>
         </LinearLayout>
@@ -65,19 +60,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_humidity_textview"
-            android:text="0%"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_wind_textview"
-            android:text="100 kmph NE"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_pressure_textview"
-            android:text="100.0"
             />
     </LinearLayout>
 </ScrollView>

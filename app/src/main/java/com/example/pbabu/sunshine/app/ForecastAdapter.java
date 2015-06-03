@@ -34,7 +34,7 @@ public class ForecastAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         int viewType = getItemViewType(cursor.getPosition());
-        int layoutId = (viewType == FORECAST_VIEW_TYPE_TODAY) && !mMainActivity.isTwoPane()?
+        int layoutId = (viewType == FORECAST_VIEW_TYPE_TODAY) ?
                 R.layout.list_item_forecast_today : R.layout.list_item_forecast;
         View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
@@ -51,17 +51,13 @@ public class ForecastAdapter extends CursorAdapter {
         //bind the view with values from the database
         final int weatherConditionId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
         int weatherImageId = -1;
-        if(!mMainActivity.isTwoPane()) {
-            switch(getItemViewType(cursor.getPosition())){
-                case FORECAST_VIEW_TYPE_TODAY:
-                    weatherImageId = Utility.getArtResourceForWeatherCondition(weatherConditionId);
-                    break;
-                case FORECAST_VIEW_TYPE_FUTURE:
-                    weatherImageId = Utility.getIconResourceForWeatherCondition(weatherConditionId);
-                    break;
-            }
-        }else {
-            weatherImageId = Utility.getIconResourceForWeatherCondition(weatherConditionId);
+        switch(getItemViewType(cursor.getPosition())) {
+            case FORECAST_VIEW_TYPE_TODAY:
+                weatherImageId = Utility.getArtResourceForWeatherCondition(weatherConditionId);
+                break;
+            case FORECAST_VIEW_TYPE_FUTURE:
+                weatherImageId = Utility.getIconResourceForWeatherCondition(weatherConditionId);
+                break;
         }
 
         viewHolder.iconView.setImageResource(weatherImageId);
@@ -95,7 +91,7 @@ public class ForecastAdapter extends CursorAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return (position == 0)? FORECAST_VIEW_TYPE_TODAY: FORECAST_VIEW_TYPE_FUTURE;
+        return (position == 0 && !mMainActivity.isTwoPane())? FORECAST_VIEW_TYPE_TODAY: FORECAST_VIEW_TYPE_FUTURE;
     }
 
 
