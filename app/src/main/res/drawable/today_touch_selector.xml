@@ -4,6 +4,8 @@
     <item android:drawable="@color/sunshine_light_blue" android:state_pressed="true"/>
     <!-- sunshine light blue color when list item is selected -->
     <item android:drawable="@color/sunshine_light_blue" android:state_checked="true" />
+    <!-- sunshine light blue color when list item is selected -->
+    <item  android:drawable="@color/sunshine_light_blue"  android:state_selected="true" />
     <!-- default color of the list item -->
-    <item android:drawable="@android:color/transparent" />
+    <item android:drawable="@color/sunshine_blue" />
 </selector>

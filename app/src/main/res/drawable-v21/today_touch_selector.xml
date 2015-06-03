@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- grey color when list item is pressed -->
+    <item android:state_pressed="true">
+        <ripple android:color="@color/grey" />
+    </item>
+    <!-- sunshine light blue color when list item is selected -->
+    <item  android:drawable="@color/sunshine_light_blue"  android:state_activated="true" />
+    <!-- sunshine light blue color when list item is selected -->
+    <item  android:drawable="@color/sunshine_light_blue"  android:state_selected="true" />
+    <!-- default color of the list item -->
+    <item android:drawable="@color/sunshine_blue" />
+</selector>
