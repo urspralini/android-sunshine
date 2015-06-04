@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.pbabu.sunshine.app.data.WeatherContract;
+import com.example.pbabu.sunshine.app.service.SunshineService;
 
 
 /**
@@ -167,9 +168,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void fetchWeatherForeCast() {
-        String location = Utility.getPreferredLocation(getActivity());
-        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity());
-        fetchWeatherTask.execute(location);
+        Intent sunshineServiceIntent = new Intent(getActivity(), SunshineService.class);
+        getActivity().startService(sunshineServiceIntent);
     }
 
     private void showLocationOnMap() {
