@@ -156,8 +156,9 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Bundle args = getArguments();
-        if(args != null && args.getString(ARG_URI_STR) != null) {
-            mUri = Uri.parse(args.getString(ARG_URI_STR));
+        if(args != null && args.getParcelable(ARG_URI_STR) != null) {
+            mUri = args.getParcelable(ARG_URI_STR);
+
         }
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
     }

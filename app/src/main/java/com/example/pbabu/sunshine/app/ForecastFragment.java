@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -108,6 +109,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         super.onCreate(savedInstanceState);
         //add this line to enable this fragment to handle menu events
         setHasOptionsMenu(true);
+        //enable content resolver to start the sync adapter for every network message sent by OS.
+        final Context context = getActivity();
+        context.getContentResolver().setSyncAutomatically(
+                SunshineSyncAdapter.getSyncAccount(context),
+                context.getString(R.string.content_authority),
+                true
+                );
     }
 
     @Override
