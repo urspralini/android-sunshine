@@ -1,10 +1,14 @@
 package com.example.pbabu.sunshine.app;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -21,6 +25,8 @@ import android.widget.ListView;
 
 import com.example.pbabu.sunshine.app.data.WeatherContract;
 import com.example.pbabu.sunshine.app.service.SunshineService;
+import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
+import com.example.pbabu.sunshine.app.sync.SunshineSyncService;
 
 
 /**
@@ -168,8 +174,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void fetchWeatherForeCast() {
-        Intent sunshineServiceIntent = new Intent(getActivity(), SunshineService.class);
+        /*Intent sunshineServiceIntent = new Intent(getActivity(), SunshineService.class);
         getActivity().startService(sunshineServiceIntent);
+        AlarmManager alarmMgr = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+        Intent alarmReceiverIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, alarmReceiverIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+        alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 5 * 1000,
+                pendingIntent);*/
+        SunshineSyncAdapter.syncImmediately(getActivity());
     }
 
     private void showLocationOnMap() {

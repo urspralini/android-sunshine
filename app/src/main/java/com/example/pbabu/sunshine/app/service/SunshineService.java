@@ -1,6 +1,7 @@
 package com.example.pbabu.sunshine.app.service;
 
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.format.Time;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.pbabu.sunshine.app.Utility;
 import com.example.pbabu.sunshine.app.data.WeatherContract;
@@ -300,5 +302,12 @@ public class SunshineService extends IntentService {
         }
     }
 
-
+    public static class AlarmReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //start sunshine service to fetch weather for the current location setting
+            Intent sunshineServiceIntent = new Intent(context, SunshineService.class);
+            context.startService(sunshineServiceIntent);
+        }
+    }
 }
