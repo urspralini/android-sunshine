@@ -7,14 +7,14 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
+import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.pbabu.sunshine.app.R;
 import com.example.pbabu.sunshine.app.Utility;
@@ -36,6 +36,11 @@ import java.util.Vector;
  * Created by pbabu on 6/5/15.
  */
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
+
+    //Sync every 3 hrs
+    private static final int SYNC_INTERVAL = 3;//60 * 180;
+    private static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+
     private static final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     private Context mContext;
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
@@ -45,6 +50,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        Log.d(LOG_TAG, "On PerformSync is called");
         fetchWeatherDataForLocationSetting();
     }
 
@@ -78,14 +84,39 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             if(!accMgr.addAccountExplicitly(newAccount, "", null)){
                 return null;
             }
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call ContentResolver.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
+            onAccountCreated(newAccount,context);
         }
         return newAccount;
+    }
+
+    private static void onAccountCreated(Account newAccount, Context context){
+        //configure periodic sync
+        configurePeriodicSync(context, newAccount);
+
+        //enable sync automatically, otherwise configurePeriodicSync does not work
+        context.getContentResolver().
+                setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
+
+        //sync immediately
+        syncImmediately(context);
+    }
+
+    private static void configurePeriodicSync(Context context, Account newAccount){
+        final String authority = context.getString(R.string.content_authority);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            SyncRequest syncRequest = new SyncRequest.Builder()
+                    .setSyncAdapter(newAccount, authority)
+                    .syncPeriodic(SYNC_INTERVAL, SYNC_FLEXTIME)
+                    .setExtras(new Bundle()).build();
+            context.getContentResolver().requestSync(syncRequest);
+        }else {
+            context.getContentResolver().addPeriodicSync(newAccount,
+                    authority, new Bundle(), SYNC_INTERVAL);
+        }
+    }
+
+    public static void initialize(Context context) {
+        getSyncAccount(context);
     }
 
     private void fetchWeatherDataForLocationSetting() {
