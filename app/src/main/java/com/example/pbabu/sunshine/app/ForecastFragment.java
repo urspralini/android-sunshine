@@ -1,8 +1,6 @@
 package com.example.pbabu.sunshine.app;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.pbabu.sunshine.app.data.WeatherContract;
-import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
 
 
 /**
@@ -149,7 +146,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_view_loc_on_map) {
+        if (item.getItemId() == R.id.action_refresh) {
+            fetchWeatherForeCast();
+            return true;
+        } else if (item.getItemId() == R.id.action_view_loc_on_map) {
             showLocationOnMap();
         }
         return super.onOptionsItemSelected(item);
@@ -167,42 +167,26 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void fetchWeatherForeCast() {
-        SunshineSyncAdapter.syncImmediately(getActivity());
+        String location = Utility.getPreferredLocation(getActivity());
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask(getActivity());
+        fetchWeatherTask.execute(location);
     }
 
     private void showLocationOnMap() {
         String location = Utility.getPreferredLocation(getActivity());
-        // these indices must match the projection
-        final int INDEX_COLUMN_LAT = 0;
-        final int INDEX_COLUMN_LONG = 1;
-        Context context = getActivity();
-        final ContentResolver contentResolver = context.getContentResolver();
-        String locationSetting = Utility.getPreferredLocation(context);
-        String[] projection = new String[]{WeatherContract.LocationEntry.COLUMN_COORD_LAT,
-                WeatherContract.LocationEntry.COLUMN_COORD_LONG};
-        String selection = WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?";
-        String[] selectionArgs = new String[]{locationSetting};
-        Cursor cursor = contentResolver.query(WeatherContract.LocationEntry.CONTENT_URI, projection,
-                selection, selectionArgs, null);
-        if(cursor.moveToFirst()){
-            final String latitude = Double.toString(cursor.getDouble(INDEX_COLUMN_LAT));
-            final String longitude = Double.toString(cursor.getDouble(INDEX_COLUMN_LONG));
-            String geoQuery = String.format("geo:%s,%s", latitude, longitude);
-            //create an implicit intent to open the location on the map
-            Uri locationUri = Uri.parse("geo:0,0?")
-                    .buildUpon()
-                    .appendQueryParameter("q", String.format("%s,%s(Your Current Location)", latitude, longitude))
-                    .build();
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW)
-                    .setData(locationUri);
-            if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivity(mapIntent);
-            } else {
-                Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
-            }
+        //create an implicit intent to open the location on the map
+        Uri locationUri = Uri.parse("geo:0,0?")
+                .buildUpon()
+                .appendQueryParameter("q", location)
+                .build();
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW)
+                .setData(locationUri);
+        if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivity(mapIntent);
+        } else {
+            Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
         }
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -229,10 +213,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     public void onLocationChanged() {
         fetchWeatherForeCast();
-        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
-    }
-
-    public void onUnitsChanged() {
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
