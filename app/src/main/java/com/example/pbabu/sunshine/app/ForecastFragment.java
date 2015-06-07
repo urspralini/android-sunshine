@@ -1,6 +1,7 @@
 package com.example.pbabu.sunshine.app;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -171,19 +172,37 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void showLocationOnMap() {
         String location = Utility.getPreferredLocation(getActivity());
-        //create an implicit intent to open the location on the map
-        Uri locationUri = Uri.parse("geo:0,0?")
-                .buildUpon()
-                .appendQueryParameter("q", location)
-                .build();
-        Intent mapIntent = new Intent(Intent.ACTION_VIEW)
-                .setData(locationUri);
-        if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivity(mapIntent);
-        } else {
-            Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
+        // these indices must match the projection
+        final int INDEX_COLUMN_LAT = 0;
+        final int INDEX_COLUMN_LONG = 1;
+        Context context = getActivity();
+        final ContentResolver contentResolver = context.getContentResolver();
+        String locationSetting = Utility.getPreferredLocation(context);
+        String[] projection = new String[]{WeatherContract.LocationEntry.COLUMN_COORD_LAT,
+                WeatherContract.LocationEntry.COLUMN_COORD_LONG};
+        String selection = WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?";
+        String[] selectionArgs = new String[]{locationSetting};
+        Cursor cursor = contentResolver.query(WeatherContract.LocationEntry.CONTENT_URI, projection,
+                selection, selectionArgs, null);
+        if(cursor.moveToFirst()){
+            final String latitude = Double.toString(cursor.getDouble(INDEX_COLUMN_LAT));
+            final String longitude = Double.toString(cursor.getDouble(INDEX_COLUMN_LONG));
+            String geoQuery = String.format("geo:%s,%s", latitude, longitude);
+            //create an implicit intent to open the location on the map
+            Uri locationUri = Uri.parse("geo:0,0?")
+                    .buildUpon()
+                    .appendQueryParameter("q", String.format("%s,%s(Your Current Location)", latitude, longitude))
+                    .build();
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW)
+                    .setData(locationUri);
+            if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(mapIntent);
+            } else {
+                Log.d(LOG_TAG, "Could not call map view intent for location:" + location);
+            }
         }
     }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

@@ -466,7 +466,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         Context context = getContext();
         final ContentResolver contentResolver = context.getContentResolver();
         String locationSetting = Utility.getPreferredLocation(context);
-        Uri deleteWeatherUri = WeatherContract.WeatherEntry.buildWeatherLocation(locationSetting);
+        Uri deleteWeatherUri = WeatherContract.WeatherEntry.CONTENT_URI;
         final Time dayTime = new Time();
         int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
         String yesterday = Long.toString(dayTime.setJulianDay(julianStartDay-1));
