@@ -264,4 +264,12 @@ public class ForecastDetailActivityFragment extends Fragment implements LoaderMa
         mUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, currentDate);
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
+
+    public void onUnitsChanged() {
+        //get the date from the current uri
+        final long currentDate = WeatherContract.WeatherEntry.getDateFromUri(mUri);
+        String location = Utility.getPreferredLocation(getActivity());
+        mUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(location, currentDate);
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+    }
 }

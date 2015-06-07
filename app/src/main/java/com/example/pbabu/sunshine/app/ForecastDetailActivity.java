@@ -15,7 +15,8 @@ import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
 public class ForecastDetailActivity extends ActionBarActivity {
 
     private static final String LOG_TAG = ForecastDetailActivity.class.getSimpleName();
-
+    private boolean mIsMetric;
+    public static final String DETAIL_FRAGMENT_TAG = "DFTAG";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //cancel if there is any notification with id:3004
@@ -25,11 +26,12 @@ public class ForecastDetailActivity extends ActionBarActivity {
         Log.d(LOG_TAG, "ForecastDetailActivity.onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast_detail);
+        mIsMetric = Utility.isMetric(this);
         if(savedInstanceState == null) {
             ForecastDetailActivityFragment df = ForecastDetailActivityFragment.newInstance(getIntent().getData());
             getSupportFragmentManager()
                     .beginTransaction()
-                    .add(R.id.weather_detail_container, df)
+                    .add(R.id.weather_detail_container, df, DETAIL_FRAGMENT_TAG)
                     .commit();
         }
     }
@@ -44,6 +46,13 @@ public class ForecastDetailActivity extends ActionBarActivity {
     protected void onResume() {
         Log.d(LOG_TAG, "ForecastDetailActivity.onResume");
         super.onResume();
+        final boolean currentMetric = Utility.isMetric(this);
+        ForecastDetailActivityFragment df = (ForecastDetailActivityFragment)getSupportFragmentManager()
+                .findFragmentByTag(DETAIL_FRAGMENT_TAG);
+        if(mIsMetric != currentMetric) {
+            df.onUnitsChanged();
+            mIsMetric = currentMetric;
+        }
     }
 
     @Override

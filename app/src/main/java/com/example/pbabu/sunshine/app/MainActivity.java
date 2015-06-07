@@ -21,8 +21,8 @@ import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
 public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private String mLocation;
+    private boolean mIsMetric;
     private boolean mTwoPane;
-    private static final String DETAIL_FRAGMENT_TAG = "DFTAG";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(LOG_TAG, "MainActivity.onCreate");
@@ -31,6 +31,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         //set default preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         mLocation = Utility.getPreferredLocation(this);
+        mIsMetric = Utility.isMetric(this);
         //clean up any notification with id:3004
         NotificationManager notificationManager = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(SunshineSyncAdapter.WEATHER_NOTIFICATION_ID);
@@ -41,7 +42,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                         .beginTransaction()
                         .replace(R.id.weather_detail_container,
                                 new ForecastDetailActivityFragment(),
-                                DETAIL_FRAGMENT_TAG)
+                                ForecastDetailActivity.DETAIL_FRAGMENT_TAG)
                         .commit();
             }
         }else {
@@ -64,18 +65,28 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         Log.d(LOG_TAG, "MainActivity.onResume");
         super.onResume();
         final String locationSetting = Utility.getPreferredLocation(this);
+        ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+        ForecastDetailActivityFragment df = (ForecastDetailActivityFragment)getSupportFragmentManager()
+                .findFragmentByTag(ForecastDetailActivity.DETAIL_FRAGMENT_TAG);
         if(!mLocation.equals(locationSetting)){
-            //do something
-            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
             if(ff != null) {
                 ff.onLocationChanged();
             }
-            ForecastDetailActivityFragment df = (ForecastDetailActivityFragment)getSupportFragmentManager()
-                    .findFragmentByTag(DETAIL_FRAGMENT_TAG);
             if(df != null) {
                 df.onLocationChanged(locationSetting);
             }
             mLocation = locationSetting;
+        }else {
+            final boolean currentMetric = Utility.isMetric(this);
+            if(mIsMetric != currentMetric) {
+                if(ff != null) {
+                    ff.onUnitsChanged();
+                }
+                if(df != null) {
+                    df.onUnitsChanged();
+                }
+                mIsMetric = currentMetric;
+            }
         }
     }
 
@@ -125,7 +136,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             ForecastDetailActivityFragment detailFragment = ForecastDetailActivityFragment
                     .newInstance(detailWeatherUri);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.weather_detail_container, detailFragment, DETAIL_FRAGMENT_TAG)
+                    .replace(R.id.weather_detail_container, detailFragment, ForecastDetailActivity.DETAIL_FRAGMENT_TAG)
                     .commit();
         }else {
             Intent detailIntent = new Intent(this, ForecastDetailActivity.class);

@@ -232,6 +232,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
+    public void onUnitsChanged() {
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
