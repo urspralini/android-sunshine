@@ -148,10 +148,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_refresh) {
-            fetchWeatherForeCast();
-            return true;
-        } else if (item.getItemId() == R.id.action_view_loc_on_map) {
+        if (item.getItemId() == R.id.action_view_loc_on_map) {
             showLocationOnMap();
         }
         return super.onOptionsItemSelected(item);
