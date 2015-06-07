@@ -1,5 +1,7 @@
 package com.example.pbabu.sunshine.app;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -29,6 +31,9 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         //set default preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         mLocation = Utility.getPreferredLocation(this);
+        //clean up any notification with id:3004
+        NotificationManager notificationManager = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(SunshineSyncAdapter.WEATHER_NOTIFICATION_ID);
         if(findViewById(R.id.weather_detail_container) != null){
             mTwoPane = true;
             if(savedInstanceState == null) {
