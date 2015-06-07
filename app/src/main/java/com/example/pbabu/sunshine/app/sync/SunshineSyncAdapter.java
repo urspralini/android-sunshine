@@ -24,6 +24,7 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.example.pbabu.sunshine.app.ForecastDetailActivity;
+import com.example.pbabu.sunshine.app.MainActivity;
 import com.example.pbabu.sunshine.app.R;
 import com.example.pbabu.sunshine.app.Utility;
 import com.example.pbabu.sunshine.app.data.WeatherContract;
@@ -46,7 +47,7 @@ import java.util.Vector;
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
     //Sync every 3 hrs
-    private static final int SYNC_INTERVAL = 3;//60 * 180;
+    private static final int SYNC_INTERVAL = 60 * 180;
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
 
     private static final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
@@ -69,7 +70,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int INDEX_SHORT_DESC = 3;
 
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
-    private static final int WEATHER_NOTIFICATION_ID = 3004;
+    public static final int WEATHER_NOTIFICATION_ID = 3004;
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
@@ -396,8 +397,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 mContext.getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI,
                         cVVector.toArray(new ContentValues[cVVector.size()]));
                 notifyWeather();
+                Log.d(LOG_TAG, "FetchWeatherTask Complete. " + cVVector.size() + " Inserted");
             }
-            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + cVVector.size() + " Inserted");
+
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
@@ -410,16 +412,20 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         String lastNotificationKey = context.getString(R.string.pref_last_notification);
         long lastSync = prefs.getLong(lastNotificationKey, 0);
         final long currentTimeMillis = System.currentTimeMillis();
-        if(currentTimeMillis - lastSync >= DAY_IN_MILLIS) {
+        boolean isNotificaionEnabled = prefs.getBoolean(context.getString(R.string.pref_notification_key),true);
+        if(currentTimeMillis - lastSync >= DAY_IN_MILLIS && isNotificaionEnabled) {
             final ContentResolver contentResolver = context.getContentResolver();
             String locationSetting = Utility.getPreferredLocation(context);
             final Uri todayWeatherUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationSetting, currentTimeMillis);
             final Cursor cursor = contentResolver.query(todayWeatherUri, NOTIFY_WEATHER_PROJECTION, null, null, null);
             if(cursor.moveToFirst()){
+                boolean isMetric = Utility.isMetric(context);
                 int weatherId = cursor.getInt(INDEX_WEATHER_ID);
                 String short_desc = cursor.getString(INDEX_SHORT_DESC);
-                String highTemp = String.valueOf(cursor.getDouble(INDEX_MAX_TEMP));
-                String lowTemp = String.valueOf(cursor.getDouble(INDEX_MIN_TEMP));
+                final double highTempature = cursor.getDouble(INDEX_MAX_TEMP);
+                String highTemp = Utility.formatTemperature(context, highTempature,isMetric);
+                final double lowTempature = cursor.getDouble(INDEX_MIN_TEMP);
+                String lowTemp = Utility.formatTemperature(context, lowTempature, isMetric);
                 String notificationContent = context.getString(R.string.format_notification, short_desc, highTemp, lowTemp);
                 int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
                 String notificationTitle = context.getString(R.string.app_name);
@@ -430,10 +436,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                         .setContentTitle(notificationTitle)
                         .setContentText(notificationContent);
 
-                Intent notificationIntent = new Intent(context,ForecastDetailActivity.class);
+                Intent notificationIntent = new Intent(context,MainActivity.class);
                 notificationIntent.setData(todayWeatherUri);
                 TaskStackBuilder stackBuilder= TaskStackBuilder.create(context);
-                stackBuilder.addParentStack(ForecastDetailActivity.class);
+                stackBuilder.addParentStack(MainActivity.class);
                 stackBuilder.addNextIntent(notificationIntent);
                 PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
                 builder.setContentIntent(pendingIntent);
