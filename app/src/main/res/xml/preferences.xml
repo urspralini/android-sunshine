@@ -14,9 +14,4 @@
         android:dialogTitle="@string/pref_units_dialog_title"
         android:entries="@array/pref_units_entries"
         android:entryValues="@array/pref_units_values"/>
-    <CheckBoxPreference android:key="@string/pref_notification_key"
-        android:title="@string/pref_notification_title"
-        android:summaryOn="@string/pref_notification_summary_on"
-        android:summaryOff="@string/pref_notification_summary_off"
-        android:defaultValue="@string/pref_enable_notifications_default"/>
 </PreferenceScreen>

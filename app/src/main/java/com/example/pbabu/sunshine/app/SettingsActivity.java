@@ -72,7 +72,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             if(indexOfValue>=0){
                 unitsPreference.setSummary(unitsPreference.getEntries()[indexOfValue]);
             }
-        }else if(key.equals(this.getString(R.string.pref_location_key))){
+        }else {
             Preference locationPreference = findPreference(key);
             locationPreference.setSummary(sharedPreferences.getString(key, ""));
         }
