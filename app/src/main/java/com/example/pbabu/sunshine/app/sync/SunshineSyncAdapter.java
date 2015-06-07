@@ -39,6 +39,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -393,6 +395,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
             // add to database
             if ( cVVector.size() > 0 ) {
+                //delete all old data for current location setting
+                deleteOldDataForLocationSetting();
                 // Student: call bulkInsert to add the weatherEntries to the database here
                 mContext.getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI,
                         cVVector.toArray(new ContentValues[cVVector.size()]));
@@ -453,5 +457,21 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
             }
         }
+    }
+
+    /**
+     * Delete all weather data that is one day old
+     */
+    private void deleteOldDataForLocationSetting(){
+        Context context = getContext();
+        final ContentResolver contentResolver = context.getContentResolver();
+        String locationSetting = Utility.getPreferredLocation(context);
+        Uri deleteWeatherUri = WeatherContract.WeatherEntry.buildWeatherLocation(locationSetting);
+        final Time dayTime = new Time();
+        int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
+        String yesterday = Long.toString(dayTime.setJulianDay(julianStartDay-1));
+        String whereClause = WeatherContract.WeatherEntry.COLUMN_DATE +" <= ?";
+        String[] selectionArgs = {yesterday};
+        contentResolver.delete(deleteWeatherUri, whereClause, selectionArgs);
     }
 }
