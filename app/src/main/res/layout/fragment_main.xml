@@ -14,5 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/empty_view_forecast"
-        android:text="@string/empty_view"/>
+        android:text="@string/empty_view"
+        android:padding="16dp"
+        android:gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
 </FrameLayout>
