@@ -10,4 +10,9 @@
         android:layout_width="match_parent"
         android:id="@+id/listview_forecast"
         android:divider="@null" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/empty_view_forecast"
+        android:text="@string/empty_view"/>
 </FrameLayout>

@@ -96,6 +96,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         if(savedInstanceState != null && savedInstanceState.containsKey(LIST_VIEW_POSITION)) {
             listViewSelectedPosition = savedInstanceState.getInt(LIST_VIEW_POSITION);
         }
+        forecastListView.setEmptyView(fragmentView.findViewById(R.id.empty_view_forecast));
         return fragmentView;
     }
 
