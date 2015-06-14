@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
@@ -34,9 +35,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
@@ -51,6 +55,18 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     //Sync every 3 hrs
     private static final int SYNC_INTERVAL = 60 * 180;
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+
+    public static final int LOCATION_STATUS_OK = 0;
+    public static final int LOCATION_STATUS_SERVER_DOWN = 1;
+    public static final int LOCATION_STATUS_SERVER_INVALID = 2;
+    public static final int LOCATION_STATUS_UNKNOWN = 3;
+
+    public static final String KEY_LAST_SYNC_STATUS = "LAST_SYNC_STATUS";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN,
+            LOCATION_STATUS_SERVER_INVALID, LOCATION_STATUS_UNKNOWN})
+    public @interface LocationStatus {}
 
     private static final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     private Context mContext;
@@ -189,7 +205,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             InputStream inputStream = urlConnection.getInputStream();
             StringBuffer buffer = new StringBuffer();
             if (inputStream == null) {
-                Log.e(LOG_TAG, "InputStream is null?");
+                throw new Exception("InputStream is null");
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -202,12 +218,16 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             if (buffer.length() == 0) {
-                Log.e(LOG_TAG, "InputStream is empty?");
+                throw new Exception("InputStream is empty?");
             }
             forecastJsonStr = buffer.toString();
-        } catch (IOException e) {
+        }catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
-        } finally {
+            setLastSyncLocationStatus(LOCATION_STATUS_SERVER_DOWN);
+        } catch(Exception ex) {
+            Log.e(LOG_TAG, "Error:", ex);
+            setLastSyncLocationStatus(LOCATION_STATUS_SERVER_DOWN);
+        }finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -224,6 +244,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             getWeatherDataFromJson(forecastJsonStr, locationQuery);
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
+            setLastSyncLocationStatus(LOCATION_STATUS_SERVER_INVALID);
             e.printStackTrace();
         }
     }
@@ -402,10 +423,12 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                         cVVector.toArray(new ContentValues[cVVector.size()]));
                 notifyWeather();
                 Log.d(LOG_TAG, "FetchWeatherTask Complete. " + cVVector.size() + " Inserted");
+                //set last sync status as OK
+                setLastSyncLocationStatus(LOCATION_STATUS_OK);
             }
-
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
+            setLastSyncLocationStatus(LOCATION_STATUS_SERVER_INVALID);
             e.printStackTrace();
         }
     }
@@ -416,7 +439,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         String lastNotificationKey = context.getString(R.string.pref_last_notification);
         long lastSync = prefs.getLong(lastNotificationKey, 0);
         final long currentTimeMillis = System.currentTimeMillis();
-        boolean isNotificaionEnabled = prefs.getBoolean(context.getString(R.string.pref_notification_key),true);
+        boolean isNotificaionEnabled = prefs.getBoolean(context.getString(R.string.pref_notification_key), true);
         if(currentTimeMillis - lastSync >= DAY_IN_MILLIS && isNotificaionEnabled) {
             final ContentResolver contentResolver = context.getContentResolver();
             String locationSetting = Utility.getPreferredLocation(context);
@@ -473,5 +496,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         String whereClause = WeatherContract.WeatherEntry.COLUMN_DATE +" <= ?";
         String[] selectionArgs = {yesterday};
         contentResolver.delete(deleteWeatherUri, whereClause, selectionArgs);
+    }
+
+    private void setLastSyncLocationStatus(@LocationStatus int lastSyncStatus) {
+        final Context context = getContext();
+        final String lastSyncKey = context.getString(R.string.pref_last_sync_location_status);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit()
+                .putInt(lastSyncKey, lastSyncStatus)
+                .commit();
     }
 }
