@@ -20,9 +20,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.pbabu.sunshine.app.data.WeatherContract;
 import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
+
+import org.w3c.dom.Text;
 
 
 /**
@@ -68,6 +71,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_PRESSURE = 10;
     static final int COL_WIND_SPEED = 11;
     private ListView forecastListView;
+    private TextView emptyTextView;
 
     public ForecastFragment() {
     }
@@ -96,7 +100,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         if(savedInstanceState != null && savedInstanceState.containsKey(LIST_VIEW_POSITION)) {
             listViewSelectedPosition = savedInstanceState.getInt(LIST_VIEW_POSITION);
         }
-        forecastListView.setEmptyView(fragmentView.findViewById(R.id.empty_view_forecast));
+        emptyTextView = (TextView)fragmentView.findViewById(R.id.empty_view_forecast);
+        forecastListView.setEmptyView(emptyTextView);
         return fragmentView;
     }
 
@@ -221,6 +226,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         if(listViewSelectedPosition != ListView.INVALID_POSITION) {
             forecastListView.smoothScrollToPosition(listViewSelectedPosition);
         }
+        updateEmptyView();
     }
 
     @Override
@@ -257,5 +263,18 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
          * DetailFragmentCallback for when an item has been selected.
          */
         public void onItemSelected(Uri dateUri);
+    }
+
+    private void updateEmptyView() {
+        if(forecastAdapter.getCount() == 0) {
+            String reasonMessage="";
+            if(!Utility.isInternetEnabled(getActivity())){
+                //no internet connection. update the empty view text
+                reasonMessage = "\n The network is not available to fetch" +
+                        " the weather data";
+            }
+            final String emptyViewText = getString(R.string.empty_view, reasonMessage);
+            emptyTextView.setText(emptyViewText);
+        }
     }
 }

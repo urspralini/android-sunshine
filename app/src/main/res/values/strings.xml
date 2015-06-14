@@ -59,5 +59,5 @@
     <string name="pref_last_notification">last_notification</string>
 
     <!-- Empty view string  -->
-    <string name="empty_view">No weather information available</string>
+    <string name="empty_view">No weather information available<xliff:g id="reason">%1$s</xliff:g></string>
 </resources>
