@@ -281,12 +281,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             String reasonMessage="";
             switch (mLastSyncStatus){
                 case SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID:
-                    final String INVALID_STATUS = "Backend Server is incompatible with current app version, please update Sunshine App";
+                    final String INVALID_STATUS = "\n Backend Server is incompatible with current app version, please update Sunshine App";
                     reasonMessage = INVALID_STATUS;
                     break;
                 case SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN:
-                    final String SERVER_DOWN_STATUS = "Backend Server is down. Please try again later";
+                    final String SERVER_DOWN_STATUS = "\n Backend Server is down. Please try again later";
                     reasonMessage = SERVER_DOWN_STATUS;
+                    break;
+                case SunshineSyncAdapter.LOCATION_STATUS_INVALID:
+                    final String INVALID_LOCATION = "\n Invalid Location";
+                    reasonMessage = INVALID_LOCATION;
                     break;
                 default:
                     if(!Utility.isInternetEnabled(getActivity())){

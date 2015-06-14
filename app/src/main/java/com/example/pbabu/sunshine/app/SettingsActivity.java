@@ -75,6 +75,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         }else if(key.equals(this.getString(R.string.pref_location_key))){
             Preference locationPreference = findPreference(key);
             locationPreference.setSummary(sharedPreferences.getString(key, ""));
+            Utility.resetLocationStatus(this);
         }
     }
 

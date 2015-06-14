@@ -267,4 +267,12 @@ public class Utility {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getInt(context.getString(R.string.pref_last_sync_location_status), LOCATION_STATUS_UNKNOWN);
     }
+
+    public static void resetLocationStatus(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit()
+                .putInt(context.getString(R.string.pref_last_sync_location_status),
+                        LOCATION_STATUS_UNKNOWN)
+                .apply();
+    }
 }
