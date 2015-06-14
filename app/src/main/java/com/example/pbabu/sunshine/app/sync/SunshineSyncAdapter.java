@@ -61,8 +61,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int LOCATION_STATUS_SERVER_INVALID = 2;
     public static final int LOCATION_STATUS_UNKNOWN = 3;
 
-    public static final String KEY_LAST_SYNC_STATUS = "LAST_SYNC_STATUS";
-
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN,
             LOCATION_STATUS_SERVER_INVALID, LOCATION_STATUS_UNKNOWN})

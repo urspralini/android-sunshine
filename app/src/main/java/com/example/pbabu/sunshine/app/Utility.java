@@ -23,6 +23,9 @@ import android.preference.PreferenceManager;
 import android.text.format.Time;
 
 import com.example.pbabu.sunshine.app.R;
+import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
+import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter.LocationStatus;
+import static com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -257,5 +260,11 @@ public class Utility {
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
         return isConnected;
+    }
+
+    @SuppressWarnings("ResourceType")
+    public static @LocationStatus int getLastSyncLocationStatus(Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getInt(context.getString(R.string.pref_last_sync_location_status), LOCATION_STATUS_UNKNOWN);
     }
 }

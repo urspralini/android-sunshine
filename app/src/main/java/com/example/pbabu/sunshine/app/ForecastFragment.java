@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -24,14 +26,15 @@ import android.widget.TextView;
 
 import com.example.pbabu.sunshine.app.data.WeatherContract;
 import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter;
-
+import static com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter.LOCATION_STATUS_OK;
+import com.example.pbabu.sunshine.app.sync.SunshineSyncAdapter.LocationStatus;
 import org.w3c.dom.Text;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener{
     private static final int FORECAST_LOADER = 0;
     private ForecastAdapter forecastAdapter;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
@@ -72,7 +75,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_WIND_SPEED = 11;
     private ListView forecastListView;
     private TextView emptyTextView;
-
+    private @LocationStatus int mLastSyncStatus;
     public ForecastFragment() {
     }
 
@@ -127,12 +130,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onResume() {
         Log.d(LOG_TAG, "ForecastFragment.onResume");
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
         super.onResume();
     }
 
     @Override
     public void onPause() {
         Log.d(LOG_TAG, "ForecastFragment.onPause");
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(this);
         super.onPause();
     }
 
@@ -253,6 +258,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        mLastSyncStatus = Utility.getLastSyncLocationStatus(getActivity());
+        updateEmptyView();
+    }
+
     /**
      * A callback interface that all activities containing this fragment must
      * implement. This mechanism allows activities to be notified of item
@@ -268,10 +279,22 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private void updateEmptyView() {
         if(forecastAdapter.getCount() == 0) {
             String reasonMessage="";
-            if(!Utility.isInternetEnabled(getActivity())){
-                //no internet connection. update the empty view text
-                reasonMessage = "\n The network is not available to fetch" +
-                        " the weather data";
+            switch (mLastSyncStatus){
+                case SunshineSyncAdapter.LOCATION_STATUS_SERVER_INVALID:
+                    final String INVALID_STATUS = "Backend Server is incompatible with current app version, please update Sunshine App";
+                    reasonMessage = INVALID_STATUS;
+                    break;
+                case SunshineSyncAdapter.LOCATION_STATUS_SERVER_DOWN:
+                    final String SERVER_DOWN_STATUS = "Backend Server is down. Please try again later";
+                    reasonMessage = SERVER_DOWN_STATUS;
+                    break;
+                default:
+                    if(!Utility.isInternetEnabled(getActivity())){
+                        //no internet connection. update the empty view text
+                        final String NO_INTERNET_CONNECTION = "\n The network is not available to fetch" +
+                                " the weather data";
+                        reasonMessage = NO_INTERNET_CONNECTION;
+                    }
             }
             final String emptyViewText = getString(R.string.empty_view, reasonMessage);
             emptyTextView.setText(emptyViewText);
