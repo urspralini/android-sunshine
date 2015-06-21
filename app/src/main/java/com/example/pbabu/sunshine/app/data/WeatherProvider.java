@@ -343,6 +343,7 @@ public class WeatherProvider extends ContentProvider {
                     db.endTransaction();
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
+                db.close();
                 return returnCount;
             default:
                 return super.bulkInsert(uri, values);
